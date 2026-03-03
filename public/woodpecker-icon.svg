@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <defs>
+    <linearGradient id="woodpeckerGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FF6B35;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#F7931E;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Woodpecker body -->
+  <ellipse cx="50" cy="60" rx="25" ry="20" fill="url(#woodpeckerGradient)" />
+  
+  <!-- Woodpecker head -->
+  <circle cx="50" cy="35" r="15" fill="#FF6B35" />
+  
+  <!-- Woodpecker crest -->
+  <path d="M 35 30 Q 50 20, 65 30" fill="#E85D2C" stroke="none" />
+  
+  <!-- Eye -->
+  <circle cx="55" cy="33" r="3" fill="white" />
+  <circle cx="56" cy="33" r="2" fill="black" />
+  
+  <!-- Beak -->
+  <path d="M 65 35 L 75 37 L 65 39 Z" fill="#2C3E50" />
+  
+  <!-- Wing pattern -->
+  <path d="M 40 55 Q 45 50, 50 55 Q 55 50, 60 55" fill="white" opacity="0.7" />
+  <path d="M 40 60 Q 45 55, 50 60 Q 55 55, 60 60" fill="white" opacity="0.7" />
+  
+  <!-- Tail -->
+  <path d="M 50 75 L 45 85 L 50 82 L 55 85 Z" fill="#FF6B35" />
+  
+  <!-- Food items (cherries) around the woodpecker -->
+  <circle cx="25" cy="25" r="4" fill="#DC143C" />
+  <circle cx="75" cy="25" r="4" fill="#DC143C" />
+  <circle cx="25" cy="75" r="4" fill="#DC143C" />
+  <circle cx="75" cy="75" r="4" fill="#DC143C" />
+  
+  <!-- Cherry stems -->
+  <path d="M 25 21 Q 23 15, 25 13" stroke="#228B22" stroke-width="1" fill="none" />
+  <path d="M 75 21 Q 77 15, 75 13" stroke="#228B22" stroke-width="1" fill="none" />
+  <path d="M 25 79 Q 23 85, 25 87" stroke="#228B22" stroke-width="1" fill="none" />
+  <path d="M 75 79 Q 77 85, 75 87" stroke="#228B22" stroke-width="1" fill="none" />
+</svg>

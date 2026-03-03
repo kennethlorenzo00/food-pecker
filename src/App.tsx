@@ -7,7 +7,7 @@ import { generatePersonaResponse, generatePersonaDraft } from "./services/groqSe
 
 export default function App() {
   const [personas, setPersonas] = useState<Persona[]>(() => {
-    const saved = localStorage.getItem("culinary_personas");
+    const saved = localStorage.getItem("foodpecker_personas");
     return saved ? JSON.parse(saved) : INITIAL_PERSONAS;
   });
   const [messages, setMessages] = useState<Message[]>([]);
@@ -28,7 +28,7 @@ export default function App() {
   const agenticEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    localStorage.setItem("culinary_personas", JSON.stringify(personas));
+    localStorage.setItem("foodpecker_personas", JSON.stringify(personas));
   }, [personas]);
 
   const scrollToBottom = () => {
@@ -184,11 +184,11 @@ export default function App() {
         <div className="max-w-6xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-ink rounded-xl flex items-center justify-center text-white shadow-lg shadow-ink/10 transition-transform duration-500">
-              <ChefHat size={20} />
+              <img src="/woodpecker-icon.svg" alt="FoodPecker" className="w-6 h-6" />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-ink leading-tight">Culinary Consensus</h1>
-              <p className="text-[9px] text-ink/40 font-bold uppercase tracking-[0.15em]">The AI Gastronomy Debate</p>
+              <h1 className="text-xl font-bold text-ink leading-tight">FoodPecker</h1>
+              <p className="text-[9px] text-ink/40 font-bold uppercase tracking-[0.15em]">The Food Debate App</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
