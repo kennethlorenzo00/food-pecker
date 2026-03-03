@@ -14,6 +14,57 @@ function getGroq() {
   return groqInstance;
 }
 
+async function extractFoodSuggestions(history: Message[]): Promise<string[]> {
+  const groq = getGroq();
+  const model = "llama-3.3-70b-versatile";
+  
+  // Get only AI persona messages (debaters)
+  const debaterMessages = history
+    .filter(m => m.role === PersonaRole.AI_PERSONA)
+    .map(m => `${m.name}: ${m.content}`)
+    .join('\n');
+
+  const systemInstruction = `You are a food extraction specialist. Your task is to extract the specific food items mentioned in debater messages.
+
+Rules:
+- Extract ONLY the main food dish being suggested
+- Do not include descriptions, opinions, or extra words
+- Return as a JSON array of food items
+- If no clear food item is found, use "unknown"
+
+Example:
+Input: "We should go for grilled salmon with quinoa"
+Output: ["grilled salmon with quinoa"]
+
+Input: "Let's get some creamy mac and cheese"
+Output: ["creamy mac and cheese"]`;
+
+  try {
+    const chatCompletion = await groq.chat.completions.create({
+      messages: [
+        {
+          role: "system",
+          content: systemInstruction,
+        },
+        {
+          role: "user",
+          content: `Extract food items from these debater messages:\n${debaterMessages}\n\nReturn as JSON array only.`,
+        },
+      ],
+      model,
+      temperature: 0.1,
+    });
+
+    const response = chatCompletion.choices[0]?.message?.content || "[]";
+    const suggestions = JSON.parse(response);
+    console.log('AI extracted food suggestions:', suggestions);
+    return Array.isArray(suggestions) ? suggestions.filter(s => s && s !== "unknown") : [];
+  } catch (error) {
+    console.error('Error extracting food suggestions:', error);
+    return [];
+  }
+}
+
 export async function generatePersonaResponse(
   persona: Persona,
   history: Message[],
@@ -30,15 +81,8 @@ export async function generatePersonaResponse(
     .map((p) => `- ${p.name}: ${p.description}`)
     .join("\n");
 
-  // Extract food suggestions from debaters for mediator
-  const debaterSuggestions = history
-    .filter(m => m.role === PersonaRole.AI_PERSONA)
-    .map(m => {
-      // Extract specific food items from messages
-      const foodMatches = m.content.match(/(?:Chicken Cordon Bleu|Lechon Kawali|chicken adobo|fried chicken|grilled chicken|spicy chicken wings|mac and cheese|truffle pasta|chocolate lava cake|steak|salad|ramen|pizza|sushi|tacos|burger|pasta|seafood platter)/gi);
-      return foodMatches ? foodMatches[0] : null;
-    })
-    .filter(Boolean);
+  // Extract food suggestions from debaters for mediator using AI
+  const debaterSuggestions = await extractFoodSuggestions(history);
 
   const systemInstruction = `
 You are ${persona.name}. 
@@ -54,14 +98,14 @@ ${historyString}
 ${persona.role === PersonaRole.MEDIATOR ? `
 MEDIATOR RULES - CRITICAL:
 - You MUST choose ONE food item from these exact suggestions: ${debaterSuggestions.join(', ')}
-- DO NOT suggest your own food item
-- DO NOT upgrade or modify the suggestions
+- DO NOT suggest your own food item that wasn't mentioned by debaters
+- DO NOT upgrade or modify the suggestions 
 - Pick ONE winner from the list above
 - Be authoritative in your decision
 
 Examples of good mediator responses:
-- "The winner is Chicken Cordon Bleu. It's sophisticated and satisfying."
-- "I choose Lechon Kawali. Perfect crispy texture and flavor."
+- "The winner is [exact food from list]. It's sophisticated and satisfying."
+- "I choose [exact food from list]. Perfect crispy texture and flavor."
 ` : `
 DEBATER RULES:
 - Suggest a SPECIFIC food dish that matches your personality description
