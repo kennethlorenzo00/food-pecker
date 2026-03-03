@@ -4,12 +4,10 @@ import { Send, Play, RefreshCw, User, ChefHat, MessageSquare, Sparkles, Settings
 import { Message, Persona, PersonaRole } from "./types";
 import { PERSONAS as INITIAL_PERSONAS } from "./constants";
 import { generatePersonaResponse, generatePersonaDraft } from "./services/groqService";
+import { savePersonaToFirestore, loadPersonasFromFirestore, updatePersonaInFirestore, deletePersonaFromFirestore } from "./services/firebaseService";
 
 export default function App() {
-  const [personas, setPersonas] = useState<Persona[]>(() => {
-    const saved = localStorage.getItem("foodpecker_personas");
-    return saved ? JSON.parse(saved) : INITIAL_PERSONAS;
-  });
+  const [personas, setPersonas] = useState<Persona[]>([]);
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputText, setInputText] = useState("");
   const [isThinking, setIsThinking] = useState(false);
@@ -23,13 +21,32 @@ export default function App() {
   const [agenticInput, setAgenticInput] = useState("");
   const [isAgenticThinking, setIsAgenticThinking] = useState(false);
   const [draftPersona, setDraftPersona] = useState<Partial<Persona> | null>(null);
+  const [isLoaded, setIsLoaded] = useState(false);
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const agenticEndRef = useRef<HTMLDivElement>(null);
 
+  // Load personas ONLY from Firestore - no localStorage fallback
   useEffect(() => {
-    localStorage.setItem("foodpecker_personas", JSON.stringify(personas));
-  }, [personas]);
+    const loadPersonas = async () => {
+      try {
+        console.log('🔄 Loading personas from Firestore only...');
+        const cloudPersonas = await loadPersonasFromFirestore();
+        setPersonas(cloudPersonas);
+        console.log('✅ Loaded personas from Firestore:', cloudPersonas.length);
+      } catch (error) {
+        console.error('❌ Failed to load personas from Firestore:', error);
+        // No fallback - app will have empty personas if Firestore fails
+        setPersonas([]);
+      } finally {
+        setIsLoaded(true);
+      }
+    };
+
+    if (!isLoaded) {
+      loadPersonas();
+    }
+  }, [isLoaded]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -103,12 +120,34 @@ export default function App() {
     setMessages([]);
   };
 
-  const savePersona = (persona: Persona) => {
-    if (personas.find(p => p.id === persona.id)) {
-      setPersonas(personas.map(p => p.id === persona.id ? persona : p));
-    } else {
-      setPersonas([...personas, persona]);
+  const savePersona = async (persona: Persona) => {
+    try {
+      console.log('💾 Saving persona:', persona.name);
+      if (personas.find(p => p.id === persona.id)) {
+        // Update existing persona
+        setPersonas(personas.map(p => p.id === persona.id ? persona : p));
+        console.log('✅ Updated existing persona locally');
+      } else {
+        // New persona - save to Firestore first
+        console.log('📤 Saving new persona to Firestore...');
+        const docId = await savePersonaToFirestore(persona);
+        // Add to local personas with the new Firestore ID
+        const newPersona = { ...persona, id: docId };
+        setPersonas([...personas, newPersona]);
+        console.log('🎉 New persona saved to Firestore with ID:', docId);
+      }
+    } catch (error) {
+      console.error('❌ Error saving persona:', error);
+      // Fallback: save locally only
+      if (!personas.find(p => p.id === persona.id)) {
+        setPersonas([...personas, persona]);
+        console.log('⚠️ Saved locally only (Firestore failed)');
+      } else {
+        setPersonas(personas.map(p => p.id === persona.id ? persona : p));
+        console.log('⚠️ Updated locally only (Firestore failed)');
+      }
     }
+
     setEditingPersona(null);
     setDraftPersona(null);
     setIsAgenticCreatorOpen(false);
@@ -191,7 +230,8 @@ export default function App() {
               <p className="text-[9px] text-ink/40 font-bold uppercase tracking-[0.15em]">The Food Debate App</p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
+
+          <div className="flex items-center gap-3">
             <button 
               onClick={() => setIsEditorOpen(true)}
               className="p-2 hover:bg-ink/5 rounded-lg transition-all text-ink/60 hover:text-ink"
