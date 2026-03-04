@@ -4,6 +4,7 @@ import { Send, Play, RefreshCw, User, ChefHat, MessageSquare, Sparkles, Settings
 import { Message, Persona, PersonaRole } from "./types";
 import { PERSONAS as INITIAL_PERSONAS } from "./constants";
 import { generatePersonaResponse, generatePersonaDraft } from "./services/groqService";
+import { loadScrapeData, processAllPersonas } from "./services/personaSelector";
 import { savePersonaToFirestore, loadPersonasFromFirestore, updatePersonaInFirestore, deletePersonaFromFirestore } from "./services/firebaseService";
 
 export default function App() {
@@ -21,8 +22,10 @@ export default function App() {
   const [agenticInput, setAgenticInput] = useState("");
   const [isAgenticThinking, setIsAgenticThinking] = useState(false);
   const [draftPersona, setDraftPersona] = useState<Partial<Persona> | null>(null);
-  const [isLoaded, setIsLoaded] = useState(false);
+  const [selectionResults, setSelectionResults] = useState<Record<string, string[]> | null>(null);
   
+  const [isLoaded, setIsLoaded] = useState(false);
+
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const agenticEndRef = useRef<HTMLDivElement>(null);
 
@@ -113,6 +116,21 @@ export default function App() {
     const mediator = personas.find(p => p.role === PersonaRole.MEDIATOR);
     if (mediator) {
       await triggerAiTurn(mediator.id);
+    }
+  };
+
+  const runPersonaSelection = async () => {
+    setIsThinking(true);
+    try {
+      const data = await loadScrapeData();
+      const results = await processAllPersonas(data, personas);
+      setSelectionResults(results);
+      console.log('Persona selection results:', results);
+    } catch (error) {
+      console.error('Error running persona selection:', error);
+      addMessage(PersonaRole.MEDIATOR, "System", "Failed to load scrape data or run selection. Ensure grabfood_results.json is in public folder.");
+    } finally {
+      setIsThinking(false);
     }
   };
 
@@ -435,6 +453,35 @@ export default function App() {
                 </motion.div>
               ))}
             </div>
+          </div>
+
+          <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+            <h2 className="text-[9px] font-bold uppercase tracking-[0.15em] text-slate-400 flex items-center gap-2 mb-4">
+              <Sparkles size={12} className="text-accent" />
+              Scraper Selection
+            </h2>
+            <button 
+              onClick={runPersonaSelection}
+              disabled={isThinking}
+              className="w-full bg-accent text-white py-3 rounded-xl font-bold text-sm hover:bg-accent/90 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-md active:scale-95"
+            >
+              Run Persona Selection
+            </button>
+            {selectionResults && (
+              <div className="mt-4 space-y-2">
+                {Object.entries(selectionResults).map(([id, choices]) => {
+                  const persona = personas.find(p => p.id === id);
+                  return (
+                    <div key={id} className="p-3 bg-slate-50 rounded-lg">
+                      <h3 className="text-sm font-bold">{persona?.name}</h3>
+                      <ul className="text-xs text-slate-600">
+                        {choices.map((choice, idx) => <li key={idx}>• {choice}</li>)}
+                      </ul>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
 
           <div className="bg-ink p-6 rounded-2xl text-white shadow-lg relative overflow-hidden group">

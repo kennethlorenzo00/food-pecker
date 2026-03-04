@@ -3,7 +3,7 @@ import { Message, Persona, PersonaRole } from "../types";
 
 let groqInstance: Groq | null = null;
 
-function getGroq() {
+export function getGroq() {
   if (!groqInstance) {
     const apiKey = import.meta.env.VITE_GROQ_API_KEY;
     if (!apiKey) {

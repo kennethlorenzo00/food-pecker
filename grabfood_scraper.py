@@ -8,7 +8,7 @@ from playwright.sync_api import sync_playwright
 # Default: Quezon City, Metro Manila — change to your target area
 LATITUDE  = 14.6760
 LONGITUDE = 121.0437
-RESTAURANT_LIMIT = 50
+RESTAURANT_LIMIT = 20
 
 BASE_URL  = "https://food.grab.com"
 HEADERS = {
