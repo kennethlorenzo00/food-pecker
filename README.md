@@ -2,11 +2,26 @@
 <img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
 </div>
 
-# Run and deploy your AI Studio app
+# Food Pecker
 
-This contains everything you need to run your app locally.
+An AI-powered food recommendation app where different AI personas debate and roast your food choices based on scraped GrabFood data.
 
-View your app in AI Studio: https://ai.studio/apps/5a43e9c5-eaa9-4c03-afbf-ccefda463c01
+
+## Features
+
+- **AI Personas**: Choose from personalities like Healthy Hannah, Comfort Chris, Spicy Sam, Sweet Sarah, and The Culinary Judge to debate your food choices.
+- **GrabFood Integration**: Scrapes real-time data from GrabFood for accurate recommendations.
+- **Groq AI Powered**: Uses Groq for fast, intelligent responses.
+
+## Technologies
+
+- React
+- TypeScript
+- Vite
+- Tailwind CSS
+- Groq SDK
+- Firebase
+- Python (for scraper)
 
 ## Run Locally
 
@@ -15,6 +30,6 @@ View your app in AI Studio: https://ai.studio/apps/5a43e9c5-eaa9-4c03-afbf-ccefd
 
 1. Install dependencies:
    `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
+2. Set the `VITE_GROQ_API_KEY` in [.env.local](.env.local) to your Groq API key
 3. Run the app:
    `npm run dev`
