@@ -222,7 +222,7 @@ export default function App() {
       <header className="sticky top-0 z-30 glass border-b border-slate-200 px-4 py-3">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-ink rounded-xl flex items-center justify-center text-white shadow-lg shadow-ink/10 transition-transform duration-500">
+            <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center text-white shadow-lg shadow-ink/10 transition-transform duration-500">
               <img src="/woodpecker-icon.svg" alt="FoodPecker" className="w-6 h-6" />
             </div>
             <div>
