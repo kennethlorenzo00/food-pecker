@@ -1,0 +1,15 @@
+[project]
+name = "passion-project"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "pandas>=3.0.1",
+    "requests>=2.32.5",
+    "rich>=14.3.3",
+    "ruff>=0.15.4",
+    "selectolax>=0.4.6",
+    "seleniumbase>=4.47.1",
+    "tool>=0.8.0",
+]
